@@ -46,3 +46,18 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Internal project files (not for public repo)
+技术交底书.md
+技术交底书.md.bak
+最终技术方案.md
+研究大纲可行性评估.md
+项目技术总结.md
+项目文件整理清单.md
+方法流程图.png
+最终识别可视化效果示意.png
+系统结构框图.png
+走神频次与状态转换统计示意图*.png
+动态 IoU 阈值与截断约束示意图*.png
+优化方案总结.md
+P0任务完成总结.md
