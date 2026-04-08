@@ -1,0 +1,48 @@
+# Model weights (not distributed)
+*.pt
+*.pth
+*.onnx
+*.h5
+weights/
+
+# Dataset & annotations
+data/
+annotations/
+annotations_class1/
+Student Behavior Date/
+*.mp4
+*.avi
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+
+# Experiment outputs
+real_results*/
+paper_figures*/
+runs/
+*.json
+*.csv
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
