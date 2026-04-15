@@ -1,29 +1,29 @@
-# Classroom Distraction Frequency Tracker
+#课堂分心频率追踪器
 
-An edge-optimized, dual-mode computer vision framework for tracking and quantifying student distraction frequency in real classroom settings.
+一种针对边缘优化的双模态计算机视觉框架，用于在真实课堂环境中跟踪和量化学生的分心频率。
 
-> **Paper:** *Edge-Optimized Dual-Mode Tracking-to-Analysis Pipeline for Robust Classroom Distraction Frequency Quantification* (Under Review)
+> **论文：** *Interpretable Classroom Distraction Estimation via Tracking-to-Analysis Continuity*（正在审稿中）
 
 ---
 
-## System Demo
+##系统演示
 
-| Real-Time NRT Mode | Offline Batch Mode |
+| Real-Time NRT Mode |离线批处理模式|
 |---|---|
-| MJPEG stream overlay | Per-student distraction report |
-| P99 head latency: 322 ms | Throughput: **21.15 FPS** |
+MJPEG流叠加每学生分心报告|
+|P99头部延迟：322毫秒|吞吐量：**21.15帧/秒** |
 
-![System Architecture](assets/system_architecture.png)
+![系统架构](assets/system_architecture.png)
 
 ---
 
-## Key Results
+##关键成果
 
-### Table 1 — Main Quantitative Comparison
+###表1 — 主要定量比较
 
-| Method | MOTA@0.3 | IDF1@0.3 | IDSW@0.3 | MOTA@0.5 | IDF1@0.5 | F1 | FPS |
+|方法|MOTA@0.3|IDF1@0.3|IDSW@0.3|MOTA@0.5|IDF1@0.5|F1|帧率|
 |---|---|---|---|---|---|---|---|
-| **Ours_Full** | **0.8928±0.075** | **0.9460±0.038** | **5.6±5.7** | **0.5995±0.198** | **0.7976±0.100** | **0.5427±0.054** | **21.15±3.49** |
+| **我们的_完整** | **0.8928±0.075** | **0.9460±0.038** | **5.6±5.7** | **0.5995±0.198** | **0.7976±0.100** | **0.5427±0.054** | **21.15±3.49** |
 | YOLOv8_ByteTrack | 0.8686±0.093 | 0.9315±0.052 | 13.7±5.6 | 0.6238±0.198 | 0.8031±0.108 | N/A | 83.19±9.33 |
 | Fixed_IoU_0.5_E2E | 0.8888±0.074 | 0.9445±0.037 | 16.1±8.6 | 0.5981±0.197 | 0.7967±0.100 | 0.5386±0.055 | 27.17±5.42 |
 | Fixed_IoU_0.3_E2E | 0.8904±0.074 | 0.9449±0.037 | 9.3±7.1 | 0.5987±0.197 | 0.7968±0.100 | 0.5399±0.054 | 25.92±4.19 |
