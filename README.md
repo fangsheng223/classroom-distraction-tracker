@@ -47,6 +47,21 @@ An edge-optimized, dual-mode computer vision framework for tracking and quantify
 
 ---
 
+## Public Repository Scope
+
+This lightweight public repository includes:
+
+- the web/API shell under `backend/`
+- the core tracking / context / temporal-statistics modules under `core/`
+- the frontend reference page under `frontend/`
+- the privacy-aware derived annotation package under `derived_release/`
+- supplementary figures and tables under `submission_assets/`
+- release-facing documentation such as `DATA_AVAILABILITY.md`, `MODEL_ACCESS.md`, `DATACARD.md`, and `RELEASES.md`
+
+This public artifact does **not** include raw classroom videos, and local end-to-end inference also requires local model checkpoints and any runtime components expected by the backend configuration.
+
+---
+
 ## Architecture
 
 ```
@@ -112,18 +127,37 @@ Video Stream
 pip install -r requirements.txt
 ```
 
-### 2. Start the backend server
+### 2. Review model and data notes
+
+Before attempting local inference, review:
+
+- `MODEL_ACCESS.md`
+- `DATA_AVAILABILITY.md`
+- `DATACARD.md`
+
+### 3. Start the backend server
 
 ```bash
-cd backend
-python manage.py runserver 0.0.0.0:8000
+python backend/manage.py runserver 0.0.0.0:8000
 ```
 
-### 3. Open the frontend
+### 4. Open the frontend
 
-Navigate to `http://localhost:8000/` in your browser.
+Navigate to one of the following in your browser:
 
-### 4. (Optional) Run core algorithm standalone
+- `http://127.0.0.1:8000/`
+- `http://127.0.0.1:8000/en/`
+
+### 5. Public-artifact note for local runtime
+
+This repository is structured as a lightweight public artifact. Full offline/NRT inference requires local availability of the model files referenced by `config.yaml` and any runtime components expected by `backend/api/views.py`.
+
+If you only need the supplementary materials, no model weights are required for:
+
+- `derived_release/`
+- `submission_assets/`
+
+### 6. (Optional) Inspect core modules standalone
 
 ```python
 from core.tracker import EnhancedTracker
@@ -140,6 +174,9 @@ tracker = EnhancedTracker(base_iou=0.3)
 
 ```
 classroom-distraction-tracker/
+├── derived_release/         # privacy-aware derived annotation package
+├── submission_assets/       # supplementary figures and LaTeX tables
+├── assets/                  # lightweight repository-facing figures
 ├── core/
 │   ├── tracker.py          # Speed-adaptive dynamic IoU tracker
 │   ├── classifier.py       # Lightweight CNN (21,475 params)
@@ -152,14 +189,38 @@ classroom-distraction-tracker/
 │       ├── urls.py         # API endpoints
 │       └── views.py        # Request handlers
 ├── frontend/
-│   └── index.html          # Vue.js single-page app
+│   └── index.html          # frontend reference page
 ├── config.yaml             # Hyperparameters
+├── DATA_AVAILABILITY.md
+├── MODEL_ACCESS.md
+├── DATACARD.md
+├── RELEASES.md
+├── LICENSE
 └── requirements.txt
 ```
 
-> **Note:** Pre-trained model weights are not included in this repository.
-> The system requires `models/lightweight_cnn.pth` (PyTorch) and
-> `yolov8s.pt` (Ultralytics) to run inference.
+> **Model note:** Pre-trained model weights are not included in this public repository. See `MODEL_ACCESS.md`.
+>
+> **Data note:** Raw classroom videos are not included. See `DATA_AVAILABILITY.md` and `DATACARD.md`.
+
+---
+
+## Supplemental Materials
+
+- `derived_release/` provides the privacy-aware derived annotation package.
+- `submission_assets/` provides supplementary figures and tables.
+- `RELEASES.md` describes the recommended public release packaging.
+
+---
+
+## License
+
+Code in this repository is released under the terms in `LICENSE`.
+
+Data, model checkpoints, and supplemental artifacts may have additional redistribution constraints described in:
+
+- `DATA_AVAILABILITY.md`
+- `MODEL_ACCESS.md`
 
 ---
 

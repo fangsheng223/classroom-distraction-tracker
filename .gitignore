@@ -34,6 +34,8 @@ paper_figures*/
 runs/
 *.json
 *.csv
+!derived_release/manifest.json
+!derived_release/*.csv
 
 # IDE
 .idea/
