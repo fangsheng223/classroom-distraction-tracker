@@ -2,7 +2,7 @@
 
 An edge-optimized, dual-mode computer vision framework for tracking and quantifying student distraction frequency in real classroom settings.
 
-> **Paper:** *Edge-Optimized Dual-Mode Tracking-to-Analysis Pipeline for Robust Classroom Distraction Frequency Quantification* (Under Review)
+> **Paper:** *Interpretable Classroom Distraction Estimation via Tracking-to-Analysis Continuity* (Under Review)
 
 ---
 
