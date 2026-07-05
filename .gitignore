@@ -36,6 +36,9 @@ runs/
 *.csv
 !derived_release/manifest.json
 !derived_release/*.csv
+# Repository-level metadata files that must be tracked even if they use
+# the .json extension (otherwise the catch-all above would ignore them)
+!codemeta.json
 
 # Zenodo CLI local config (must never be committed)
 .zenodo.json
