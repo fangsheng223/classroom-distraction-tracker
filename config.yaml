@@ -1,0 +1,63 @@
+# ============================================================
+# Classroom Distraction Tracker — Configuration
+# ============================================================
+
+# Detector
+detector:
+  model: "yolov8s"
+  weights: "yolov8s.pt"          # not included; download from ultralytics
+  conf_threshold: 0.25
+  iou_threshold: 0.45
+  input_size: 640
+  device: "cuda"                  # cuda / cpu
+  classes: [0]                    # person only
+  det_interval: 3                 # run detector every N frames
+
+# Tracker  (paper: Table 1 Ours_Full)
+tracker:
+  base_iou_threshold: 0.3         # τ_base
+  max_age: 150
+  min_hits: 3
+  use_hungarian: false            # greedy by default (paper default)
+
+  dynamic_iou:
+    enabled: true
+    k: 0.1                        # speed modulation factor  (paper: k=0.1)
+    v_max: 2.0                    # speed proxy upper limit  (paper: v_max=2.0)
+    lower_bound: 0.15             # τ(v) = max(τ_base - k·min(v,v_max), 0.15)
+
+  combined_score:
+    enabled: true
+    w_iou: 0.5                    # IoU weight
+    w_dist: 0.3                   # centre-distance weight
+    w_size: 0.2                   # size-similarity weight
+
+  recovery:
+    enabled: true
+    window: 10                    # frames to attempt re-association
+
+# Lightweight CNN
+classifier:
+  weights: "models/lightweight_cnn.pth"   # not included
+  input_size: [224, 224]
+  # Hard-parameter thresholds
+  nose_offset_threshold: 20
+  head_down_threshold: 30
+  shoulder_diff_threshold: 25
+
+# Context correction module
+context:
+  enabled: true
+  window_size: 5                  # temporal majority-voting window (causal / NRT)
+  tau_low: 0.25                   # lower decision boundary
+  tau_high: 0.55                  # upper decision boundary
+
+# Temporal statistics
+stats:
+  window_W: 30                    # sliding window W (frames)   paper: W=30
+
+# Execution mode
+execution:
+  mode: "offline"                 # offline | nrt
+  # NRT: det_interval=3, causal context window
+  # Offline: det_interval=3, bidirectional context window

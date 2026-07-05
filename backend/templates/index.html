@@ -1,0 +1,1503 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>学生分心检测系统</title>
+  <script>
+    (function () {
+      if (window.Vue && window.Vue.createApp) return;
+      var urls = [
+        '/static/vue/vue.global.prod.js',
+        'https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js',
+        'https://unpkg.com/vue@3/dist/vue.global.prod.js'
+      ];
+
+      window.__ensureVue = function (opts) {
+        opts = opts || {};
+        var timeoutMs = typeof opts.timeoutMs === 'number' ? opts.timeoutMs : 8000;
+        var pollMs = typeof opts.pollMs === 'number' ? opts.pollMs : 50;
+        return new Promise(function (resolve, reject) {
+          var started = Date.now();
+          (function tick() {
+            if (window.Vue && window.Vue.createApp) return resolve(window.Vue);
+            if (Date.now() - started > timeoutMs) return reject(new Error('Vue load timeout'));
+            setTimeout(tick, pollMs);
+          })();
+        });
+      };
+
+      function load(i) {
+        if (i >= urls.length) return;
+        var s = document.createElement('script');
+        s.src = urls[i];
+        s.async = true;
+        s.onload = function () {
+          if (window.Vue && window.Vue.createApp) return;
+          load(i + 1);
+        };
+        s.onerror = function () { load(i + 1); };
+        document.head.appendChild(s);
+      }
+      load(0);
+    })();
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; color: #e8eefc; background: radial-gradient(1200px 800px at 20% 0%, rgba(29,59,99,0.95) 0%, rgba(29,59,99,0) 60%), radial-gradient(900px 700px at 90% 10%, rgba(58,47,95,0.95) 0%, rgba(58,47,95,0) 55%), #07101c; }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 18px 18px 26px; }
+    .card { background: rgba(18, 26, 43, 0.78); border: 1px solid rgba(63, 88, 140, 0.55); border-radius: 14px; padding: 14px; box-shadow: 0 10px 28px rgba(0,0,0,0.25); backdrop-filter: blur(8px); }
+    .row { display: contents; }
+    h1 { font-size: 18px; margin: 0; letter-spacing: 0.3px; }
+    .muted { color: rgba(210, 224, 255, 0.74); font-size: 12px; }
+    .btn { background: linear-gradient(180deg, #2d7bff 0%, #1e60d8 100%); border: 0; color: #fff; padding: 10px 12px; border-radius: 12px; cursor: pointer; font-weight: 700; }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn2 { background: rgba(7, 16, 28, 0.55); border: 1px solid rgba(77, 105, 165, 0.6); }
+    .btnDanger { background: rgba(127, 29, 29, 0.32); border: 1px solid rgba(185, 28, 28, 0.55); color: rgba(255, 226, 226, 0.95); }
+    .btnWarn { background: rgba(120, 53, 15, 0.25); border: 1px solid rgba(245, 158, 11, 0.5); color: rgba(253, 230, 138, 0.95); }
+    .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .controls .full { grid-column: 1 / -1; }
+    .fileHiddenInput { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+    .filePickRow { display: grid; grid-template-columns: 132px 1fr; gap: 10px; align-items: center; }
+    .fileNameBox { padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(77, 105, 165, 0.55); background: rgba(7, 16, 28, 0.45); color: rgba(235, 242, 255, 0.9); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    video { width: 100%; background: #000; border-radius: 12px; border: 1px solid rgba(77, 105, 165, 0.55); }
+    .placeholder { height: 320px; border-radius: 12px; border: 1px dashed rgba(90, 120, 190, 0.55); display: flex; align-items: center; justify-content: center; color: rgba(210, 224, 255, 0.7); background: rgba(7, 16, 28, 0.25); text-align: center; padding: 10px; }
+    pre { white-space: pre-wrap; word-break: break-word; background: rgba(7, 16, 28, 0.65); border: 1px solid rgba(77, 105, 165, 0.55); padding: 12px; border-radius: 12px; height: 220px; overflow: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid rgba(77, 105, 165, 0.32); padding: 8px 6px; text-align: left; font-size: 12px; vertical-align: top; }
+    th { color: rgba(220, 234, 255, 0.92); font-weight: 800; }
+    input[type="number"], input[type="text"], select { width: 100%; background: rgba(7, 16, 28, 0.65); border: 1px solid rgba(77, 105, 165, 0.55); color: #e8eefc; padding: 9px 10px; border-radius: 12px; }
+    label { font-size: 12px; color: rgba(220, 234, 255, 0.9); }
+
+    input[type="file"] { width: 100%; background: rgba(7, 16, 28, 0.45); border: 1px solid rgba(77, 105, 165, 0.55); color: rgba(220, 234, 255, 0.92); padding: 8px 10px; border-radius: 12px; }
+    input[type="file"]::file-selector-button {
+      background: linear-gradient(180deg, #2d7bff 0%, #1e60d8 100%);
+      border: 0;
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 800;
+      margin-right: 10px;
+    }
+    input[type="file"]::-webkit-file-upload-button {
+      background: linear-gradient(180deg, #2d7bff 0%, #1e60d8 100%);
+      border: 0;
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 800;
+      margin-right: 10px;
+    }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    @media (max-width: 1100px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+    .grid2tight { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid2tight .span2 { grid-column: 1 / -1; }
+    .grid2tight > div { min-width: 0; }
+    .formRow { display: grid; grid-template-columns: 1fr; gap: 6px; }
+    .helpLine { margin-top: 10px; padding: 8px 10px; border-radius: 12px; background: rgba(7, 16, 28, 0.35); border: 1px solid rgba(77, 105, 165, 0.35); }
+    img.viz { width: 100%; border-radius: 12px; border: 1px solid rgba(77, 105, 165, 0.55); background: #000; display:block; }
+    .barList { display: grid; gap: 8px; }
+    .barRow { display: grid; grid-template-columns: 64px 1fr 58px; gap: 8px; align-items: center; }
+    .barTrack { height: 10px; border-radius: 999px; background: rgba(7, 16, 28, 0.55); border: 1px solid rgba(77, 105, 165, 0.35); overflow: hidden; }
+    .barFill { height: 100%; background: linear-gradient(90deg, rgba(45, 123, 255, 0.85), rgba(34, 197, 94, 0.65)); }
+    .tag { display:inline-flex; align-items:center; gap: 6px; padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(77, 105, 165, 0.55); font-size: 12px; color: rgba(220, 234, 255, 0.9); background: rgba(7, 16, 28, 0.35); }
+    .ok { border-color: rgba(22, 163, 74, 0.55); color: rgba(187, 247, 208, 0.95); }
+    .bad { border-color: rgba(220, 38, 38, 0.65); color: rgba(254, 202, 202, 0.95); }
+    .warn { border-color: rgba(245, 158, 11, 0.55); color: rgba(253, 230, 138, 0.95); }
+
+    #app.wrap { max-width: 1360px; }
+    .shell { display: grid; grid-template-columns: 340px 1fr; grid-template-rows: auto 1fr auto; gap: 14px; grid-template-areas:
+      "header header"
+      "sidebar main"
+      "footer footer";
+      align-items: start;
+    }
+    @media (max-width: 1100px) {
+      .shell { grid-template-columns: 1fr; grid-template-areas:
+        "header"
+        "main"
+        "sidebar"
+        "footer";
+      }
+    }
+
+    .topbar { grid-area: header; padding: 14px 16px; }
+    .sidebar { grid-area: sidebar; display: grid; gap: 14px; }
+    .main { grid-area: main; display: grid; gap: 14px; }
+    .footer { grid-area: footer; display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+    @media (max-width: 1100px) { .footer { grid-template-columns: 1fr; } }
+
+    .topbarInner { display:flex; justify-content:space-between; gap: 12px; align-items:center; }
+    .topbarRight { display:flex; gap: 10px; align-items:center; flex-wrap: wrap; justify-content:flex-end; }
+
+    .seg { display:flex; gap: 6px; padding: 6px; border-radius: 14px; background: rgba(7, 16, 28, 0.35); border: 1px solid rgba(77, 105, 165, 0.35); }
+    .seg button { flex: 1; padding: 10px 12px; border-radius: 12px; background: transparent; border: 1px solid transparent; color: rgba(220, 234, 255, 0.86); cursor: pointer; font-weight: 800; }
+    .seg button.active { background: rgba(45, 123, 255, 0.18); border-color: rgba(45, 123, 255, 0.45); color: rgba(235, 242, 255, 0.95); }
+
+    details { background: rgba(7, 16, 28, 0.25); border: 1px solid rgba(77, 105, 165, 0.35); border-radius: 14px; padding: 10px 12px; }
+    details > summary { list-style: none; cursor: pointer; font-weight: 900; color: rgba(235, 242, 255, 0.92); }
+    details > summary::-webkit-details-marker { display: none; }
+    .kvRow { display:grid; grid-template-columns: 140px 1fr; gap: 8px; align-items:center; }
+    .kvRow .k { color: rgba(210, 224, 255, 0.74); font-size: 12px; }
+    .kvRow .v { font-size: 12px; color: rgba(235, 242, 255, 0.92); }
+    .sectionTitle { font-weight: 800; font-size: 14px; letter-spacing: 0.2px; }
+
+    .scrollArea { max-height: 300px; overflow: auto; border-radius: 12px; }
+    .scrollArea::-webkit-scrollbar { height: 10px; width: 10px; }
+    .scrollArea::-webkit-scrollbar-thumb { background: rgba(77, 105, 165, 0.45); border-radius: 999px; }
+
+    .pill { display:inline-flex; align-items:center; padding: 5px 10px; border-radius: 999px; background: rgba(7, 16, 28, 0.45); border: 1px solid rgba(77, 105, 165, 0.45); font-size: 12px; color: rgba(235, 242, 255, 0.92); }
+
+    .paramGrid { gap: 8px; }
+    .paramGrid .formRow { gap: 4px; }
+    .paramGrid label { font-size: 11px; color: rgba(198, 214, 248, 0.82); letter-spacing: 0.2px; }
+    .paramGrid input[type="number"],
+    .paramGrid input[type="text"],
+    .paramGrid select { padding: 8px 10px; border-radius: 12px; }
+    .paramGrid input[type="number"]:focus,
+    .paramGrid input[type="text"]:focus,
+    .paramGrid select:focus { outline: none; border-color: rgba(45, 123, 255, 0.85); box-shadow: 0 0 0 3px rgba(45, 123, 255, 0.18); }
+
+    @media (max-width: 1250px) {
+      .sidebar .grid2tight { grid-template-columns: 1fr; }
+      .sidebar .grid2tight .span2 { grid-column: auto; }
+    }
+
+    @media (max-width: 520px) {
+      .wrap { padding: 14px 12px 22px; }
+      .topbarInner { flex-direction: column; align-items: flex-start; }
+      .topbarRight { width: 100%; justify-content: flex-start; }
+      .filePickRow { grid-template-columns: 1fr; }
+      .filePickRow .btn { width: 100%; }
+      .kvRow { grid-template-columns: 120px 1fr; }
+    }
+
+    #bootErrorOverlay { display:none; position: fixed; left: 16px; bottom: 16px; right: 16px; max-width: 720px; z-index: 9999; padding: 10px 12px; border-radius: 14px; background: rgba(127, 29, 29, 0.22); border: 1px solid rgba(220, 38, 38, 0.55); color: rgba(255, 226, 226, 0.95); font-size: 12px; white-space: pre-wrap; word-break: break-word; }
+  </style>
+</head>
+<body>
+  {% verbatim %}
+  <div id="app"></div>
+  <template id="appTpl">
+  <div class="wrap">
+    <div class="shell">
+      <div class="card topbar">
+        <div class="topbarInner">
+          <div>
+            <h1>学生分心检测系统</h1>
+            <div class="muted" style="margin-top: 6px;">离线检测 + 实时监控（摄像头/流） · 单任务安全队列 · 指标与日志</div>
+          </div>
+          <div class="topbarRight">
+            <span class="tag" :class="statusTagClass">job: {{ status }}</span>
+            <span class="tag" v-if="jobId">id: {{ jobId }}</span>
+            <span class="tag" v-if="rt.lastStatus">rt: {{ rt.lastStatus.status || 'idle' }}</span>
+            <a class="btn btn2" href="/en/" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">EN</a>
+            <button class="btn btn2" @click="refreshRecent">刷新任务</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="card">
+          <div class="sectionTitle" style="margin-bottom: 10px;">模式</div>
+          <div class="seg">
+            <button :class="{active: ui.mode === 'offline'}" @click="ui.mode='offline'">离线</button>
+            <button :class="{active: ui.mode === 'realtime'}" @click="ui.mode='realtime'">实时</button>
+          </div>
+          <div class="helpLine">
+            <div class="kvRow"><div class="k">互斥</div><div class="v">离线与实时同一时间只能运行一个</div></div>
+            <div class="kvRow" v-if="metrics && metrics.fps"><div class="k">离线 FPS</div><div class="v">{{ (metrics.fps||0).toFixed(2) }}</div></div>
+            <div class="kvRow" v-if="rt.lastStatus && rt.lastStatus.metrics"><div class="k">实时 FPS</div><div class="v">{{ (rt.lastStatus.metrics.session_fps||0).toFixed(2) }}</div></div>
+          </div>
+        </div>
+
+        <div class="card" v-if="ui.mode === 'offline'">
+          <div class="sectionTitle" style="margin-bottom: 10px;">离线任务</div>
+          <div class="controls">
+            <input ref="fileInput" class="fileHiddenInput" type="file" accept="video/*" @change="onPick" />
+            <div class="full filePickRow">
+              <button class="btn btn2" @click="pickFile">选择文件</button>
+              <div class="fileNameBox">{{ file ? file.name : '未选择任何文件' }}</div>
+            </div>
+            <button class="btn" :disabled="!file || uploading" @click="upload">{{ uploading ? '上传中...' : '上传文件' }}</button>
+            <button class="btn btn2" :disabled="!jobId || running || rt.running" @click="run">{{ running ? '检测中...' : '开始检测' }}</button>
+            <button class="btn btnWarn" :disabled="!jobId || !(status === 'running' || status === 'queued')" @click="stop">停止</button>
+            <button class="btn btnDanger" :disabled="!jobId" @click="clearLog">清空日志</button>
+            <button class="btn btn2" :disabled="!jobId" @click="openOfflineOverallReport">总体报告</button>
+            <button class="btn btnDanger full" :disabled="status === 'running' || status === 'queued'" @click="clearHistory">清除历史</button>
+          </div>
+          <div class="muted" style="margin-top: 10px;">显示模式</div>
+          <select v-model="displayMode" style="width:100%; margin-top: 6px;">
+            <option value="full">全部显示</option>
+            <option value="viz_only">只显示效果可视化</option>
+          </select>
+        </div>
+
+        <div class="card" v-else>
+          <div class="sectionTitle" style="margin-bottom: 10px;">实时监控</div>
+          <div class="controls">
+            <input class="full" type="text" v-model="rt.source" placeholder="source: 0 / rtsp://... / file" />
+            <button class="btn" :disabled="rt.running || status === 'running' || status === 'queued'" @click="rtStart">开始</button>
+            <button class="btn btnWarn" :disabled="!rt.running" @click="rtStop">停止</button>
+            <button class="btn btn2" :disabled="!rt.sessionId" @click="openRealtimeOverallReport">总体报告</button>
+          </div>
+
+          <div class="muted" style="margin-top: 10px;">摄像头</div>
+          <div class="grid2tight" style="margin-top: 6px;">
+            <select v-model="rt.camSelected" style="width:100%;">
+              <option value="">(未探测)</option>
+              <option v-for="c in rt.cameras" :key="'cam-'+String(c)" :value="String(c)">camera {{ c }}</option>
+            </select>
+            <button class="btn btn2" :disabled="rt.running" @click="rtProbeCameras">探测</button>
+          </div>
+
+          <details style="margin-top: 12px;">
+            <summary>性能与安全</summary>
+            <div class="grid2tight" style="margin-top: 10px;">
+              <div class="formRow">
+                <label>max_fps</label>
+                <input type="number" step="0.5" v-model="rt.max_fps" placeholder="10" style="width:100%;" />
+              </div>
+              <div class="formRow">
+                <label>resize_width</label>
+                <input type="number" step="1" v-model="rt.resize_width" placeholder="896" style="width:100%;" />
+              </div>
+              <div class="formRow span2">
+                <label>token（可选）</label>
+                <input type="text" v-model="rt.token" placeholder="(optional)" style="width:100%;" />
+              </div>
+              <div class="formRow span2">
+                <label>实验模式（方案B延迟测量）</label>
+                <select v-model="rt.exp_enabled" style="width:100%;">
+                  <option value="0">关闭</option>
+                  <option value="1">开启</option>
+                </select>
+              </div>
+              <div class="formRow span2">
+                <button class="btn btn2" :disabled="String(rt.exp_enabled||'0')!=='1' || !rt.expRun || !rt.expRun.started_at_ms" @click="rtExportExperiment">导出实验数据（JSON）</button>
+                <div class="muted" style="margin-top: 6px;" v-if="String(rt.exp_enabled||'0')==='1'">仅在开启实验模式且已采样后可导出</div>
+              </div>
+            </div>
+          </details>
+
+          <details style="margin-top: 12px;">
+            <summary>截图与录制</summary>
+            <div class="grid2tight" style="margin-top: 10px;">
+              <div class="formRow">
+                <label>record</label>
+                <select v-model="rt.record_enabled" style="width:100%;">
+                  <option value="0">关闭</option>
+                  <option value="1">开启</option>
+                </select>
+              </div>
+              <div class="formRow">
+                <label>record_fps</label>
+                <input type="number" step="0.5" v-model="rt.record_fps" placeholder="10" style="width:100%;" />
+              </div>
+              <div class="formRow span2">
+                <div class="grid2tight">
+                  <button class="btn btn2" :disabled="!rt.running" @click="rtSnapshot">截图</button>
+                  <a v-if="rt.lastStatus && rt.lastStatus.record_url" class="btn btn2" :href="rt.lastStatus.record_url" target="_blank" style="text-decoration:none; display:inline-flex; justify-content:center; align-items:center;">下载录制</a>
+                  <button v-else class="btn btn2" disabled>下载录制</button>
+                </div>
+                <div class="muted" style="margin-top: 6px;" v-if="rt.lastStatus && rt.lastStatus.record_enabled">停止后生成下载链接</div>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <details>
+          <summary>高级参数</summary>
+          <div class="muted" style="margin-top: 8px;">这些参数会影响离线任务与实时任务（若支持）。</div>
+          <div class="grid2tight paramGrid" style="margin-top: 10px;">
+            <div class="formRow span2">
+              <label>config</label>
+              <select v-model="params.config">
+                <option v-for="c in configs" :key="'cfg-'+c" :value="c">{{ c }}</option>
+              </select>
+            </div>
+            <div class="formRow span2">
+              <label>perf_mode</label>
+              <select v-model="params.perf_mode">
+                <option value="">(default)</option>
+                <option value="fast">fast</option>
+                <option value="balanced">balanced</option>
+                <option value="accurate">accurate</option>
+              </select>
+            </div>
+
+            <div class="formRow">
+              <label>det_conf</label>
+              <input type="number" step="0.01" v-model="params.det_conf" />
+            </div>
+            <div class="formRow">
+              <label>det_iou</label>
+              <input type="number" step="0.01" v-model="params.det_iou" />
+            </div>
+            <div class="formRow">
+              <label>det_imgsz</label>
+              <input type="number" step="1" v-model="params.det_imgsz" />
+            </div>
+            <div class="formRow">
+              <label>bbox_scale</label>
+              <input type="number" step="0.01" v-model="params.det_bbox_scale" />
+            </div>
+            <div class="formRow">
+              <label>freq_window</label>
+              <input type="number" step="1" v-model="params.freq_window" />
+            </div>
+            <div class="formRow">
+              <label>tracker_hungarian</label>
+              <select v-model="params.tracker_hungarian">
+                <option value="">(default)</option>
+                <option value="1">1</option>
+                <option value="0">0</option>
+              </select>
+            </div>
+            <div class="formRow">
+              <label>use_combined_score</label>
+              <select v-model="params.use_combined_score">
+                <option value="">(default)</option>
+                <option value="1">1</option>
+                <option value="0">0</option>
+              </select>
+            </div>
+            <div class="formRow">
+              <label>use_dynamic_threshold</label>
+              <select v-model="params.use_dynamic_threshold">
+                <option value="">(default)</option>
+                <option value="1">1</option>
+                <option value="0">0</option>
+              </select>
+            </div>
+          </div>
+          <div class="helpLine">
+            <button class="btn btn2" @click="loadConfigs">刷新 configs</button>
+            <span class="muted" style="margin-left: 10px;">实时 start 会自动 warmup</span>
+          </div>
+        </details>
+
+      </div>
+
+      <div class="main">
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+            <div>
+              <div class="sectionTitle">主视图</div>
+              <div class="muted">离线：输入/输出视频 · 实时：MJPEG 流</div>
+            </div>
+            <div style="display:flex; gap: 10px; align-items:center;">
+              <span class="pill" v-if="ui.mode==='offline'">Offline</span>
+              <span class="pill" v-else>Realtime</span>
+            </div>
+          </div>
+
+          <div v-if="ui.mode==='realtime'">
+            <div v-if="rt.running" style="display:grid; gap: 10px;">
+              <img class="viz" :src="rt.mjpegUrl" alt="realtime stream" />
+              <div class="muted" v-if="rt.lastStatus">
+                <span class="tag" :class="rtTagClass">rt: {{ rt.lastStatus.status || 'unknown' }}</span>
+                <span class="tag" v-if="rt.lastStatus.metrics">fps: {{ (rt.lastStatus.metrics.session_fps || 0).toFixed(2) }}</span>
+                <span class="tag" v-if="rt.latencyHeadStats">head p50/p95/p99: {{ rt.latencyHeadStats.p50.toFixed(0) }}/{{ rt.latencyHeadStats.p95.toFixed(0) }}/{{ rt.latencyHeadStats.p99.toFixed(0) }} ms</span>
+                <span class="tag" v-if="rt.latencyStats">render p50/p95/p99: {{ rt.latencyStats.p50.toFixed(0) }}/{{ rt.latencyStats.p95.toFixed(0) }}/{{ rt.latencyStats.p99.toFixed(0) }} ms</span>
+                <span class="tag bad" v-if="rt.lastStatus.error">{{ rt.lastStatus.error }}</span>
+              </div>
+            </div>
+            <div v-else class="placeholder">点击“开始”进入实时监控</div>
+          </div>
+
+          <div v-else>
+            <div class="grid2" style="align-items:start;">
+              <div>
+                <div class="muted" style="margin-bottom: 8px;">输入预览</div>
+                <video v-if="localPreviewUrl" :src="localPreviewUrl" controls muted playsinline></video>
+                <div v-else-if="inputUrl" class="placeholder" style="height: 260px;">已上传：{{ inputUrl }}</div>
+                <div v-else class="placeholder" style="height: 260px;">选择文件并上传</div>
+              </div>
+              <div>
+                <div class="muted" style="margin-bottom: 8px;">输出可视化</div>
+                <video v-if="outputUrl" :key="outputUrl" :src="outputUrl" controls preload="metadata" playsinline></video>
+                <div v-else class="placeholder" style="height: 260px;">运行完成后生成输出视频</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" v-if="showPanels && metrics">
+          <div class="sectionTitle" style="margin-bottom: 10px;">检测摘要</div>
+          <div class="grid3">
+            <div class="helpLine">
+              <div class="muted">学生数</div>
+              <div style="font-size: 18px; font-weight: 900;">{{ metrics.total_students }}</div>
+            </div>
+            <div class="helpLine">
+              <div class="muted">平均分心率</div>
+              <div style="font-size: 18px; font-weight: 900;">{{ (metrics.avg_distraction_rate*100).toFixed(2) }}%</div>
+            </div>
+            <div class="helpLine">
+              <div class="muted">帧数</div>
+              <div style="font-size: 18px; font-weight: 900;">{{ metrics.frame_count }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" v-if="showPanels && ui.mode==='offline' && metrics">
+          <div class="sectionTitle" style="margin-bottom: 10px;">学生报告</div>
+          <div class="grid2tight">
+            <input type="text" v-model="ui.report_student_id" placeholder="student_id" />
+            <button class="btn btn2" :disabled="!jobId || !ui.report_student_id" @click="openOfflineStudentReport(ui.report_student_id)">打开报告</button>
+          </div>
+          <div class="muted" style="margin-top: 10px;">快捷入口（按分心率排序）</div>
+          <div class="scrollArea" style="margin-top: 8px;">
+            <table>
+              <thead>
+                <tr><th>student_id</th><th>分心率</th><th>转换率</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr v-for="s in topStudentsAll" :key="'off-s-'+String(s.student_id)">
+                  <td>{{ s.student_id }}</td>
+                  <td>{{ ((Number(s.distraction_rate)||0)*100).toFixed(2) }}%</td>
+                  <td>{{ ((Number(s.transition_rate)||0)*100).toFixed(2) }}%</td>
+                  <td style="text-align:right;">
+                    <button class="btn btn2" :disabled="!jobId" @click="openOfflineStudentReport(s.student_id)">Report</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" v-if="showPanels && ui.mode==='realtime' && rt.lastStatus && rt.lastStatus.metrics">
+          <div class="sectionTitle" style="margin-bottom: 10px;">学生报告（实时）</div>
+          <div class="grid2tight">
+            <input type="text" v-model="ui.report_student_id_rt" placeholder="student_id" />
+            <button class="btn btn2" :disabled="!rt.sessionId || !ui.report_student_id_rt" @click="openRealtimeStudentReport(ui.report_student_id_rt)">打开报告</button>
+          </div>
+          <div class="muted" style="margin-top: 10px;">快捷入口（按分心率排序）</div>
+          <div class="scrollArea" style="margin-top: 8px;">
+            <table>
+              <thead>
+                <tr><th>student_id</th><th>分心率</th><th>转换率</th><th></th></tr>
+              </thead>
+              <tbody>
+                <tr v-for="s in rtTopStudentsAll" :key="'rt-s-'+String(s.student_id)">
+                  <td>{{ s.student_id }}</td>
+                  <td>{{ ((Number(s.distraction_rate)||0)*100).toFixed(2) }}%</td>
+                  <td>{{ ((Number(s.transition_rate)||0)*100).toFixed(2) }}%</td>
+                  <td style="text-align:right;">
+                    <button class="btn btn2" :disabled="!rt.sessionId" @click="openRealtimeStudentReport(s.student_id)">Report</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="muted" style="margin-top: 10px;">提示：若设置了 token，将使用 URL 参数携带 token 打开报告页</div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div class="sectionTitle">日志</div>
+            <button class="btn btn2" :disabled="!jobId" @click="refresh">刷新</button>
+          </div>
+          <div class="grid2" style="gap: 12px;">
+            <div>
+              <div class="muted" style="margin-bottom: 8px;">Realtime</div>
+              <pre style="height: 220px;">{{ (rt.lastStatus && rt.lastStatus.logs && rt.lastStatus.logs.length) ? rt.lastStatus.logs.join('\n') : '(no realtime logs yet)' }}</pre>
+            </div>
+            <div>
+              <div class="muted" style="margin-bottom: 8px;">Offline</div>
+              <pre style="height: 220px;">{{ logTail || '(no logs yet)' }}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div class="sectionTitle">历史任务</div>
+            <button class="btn btn2" @click="refreshRecent">刷新</button>
+          </div>
+          <div class="scrollArea">
+            <table>
+              <thead>
+                <tr><th>job_id</th><th>status</th><th>file</th></tr>
+              </thead>
+              <tbody>
+                <tr v-for="j in recentJobs" :key="'job-'+j.job_id" style="cursor:pointer;" @click="selectJob(j.job_id)">
+                  <td>{{ j.job_id.slice(0, 8) }}</td>
+                  <td><span class="tag" :class="(j.status==='done')?'ok':((j.status==='error')?'bad':((j.status==='running'||j.status==='queued')?'warn':''))">{{ j.status }}</span></td>
+                  <td class="muted">{{ j.filename || '-' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </template>
+  {% endverbatim %}
+
+  <div id="bootErrorOverlay"></div>
+
+  <script>
+    const __getBootEl = () => document.getElementById('bootErrorOverlay');
+    const __showBootError = (msg) => {
+      try {
+        const el = __getBootEl();
+        if (!el) return;
+        el.style.display = 'block';
+        el.textContent = String(msg || 'Unknown error');
+      } catch (e) {
+        // ignore
+      }
+    };
+
+    __showBootError('JS 已加载，正在初始化 Vue...');
+
+    window.addEventListener('error', (e) => {
+      const m = e && e.error ? (e.error.stack || e.error.message || e.message) : (e && e.message ? e.message : e);
+      __showBootError('前端初始化失败（JS error）：\n' + String(m));
+    });
+    window.addEventListener('unhandledrejection', (e) => {
+      const r = e && e.reason ? (e.reason.stack || e.reason.message || e.reason) : e;
+      __showBootError('前端初始化失败（Promise rejection）：\n' + String(r));
+    });
+
+    (async () => {
+      try {
+        const ensure = window.__ensureVue;
+        if (typeof ensure !== 'function') {
+          throw new Error('Vue loader not found');
+        }
+        await ensure({ timeoutMs: 12000, pollMs: 50 });
+        const __Vue = window.Vue;
+        if (!__Vue || !__Vue.createApp) {
+          throw new Error('Vue not available after load');
+        }
+        const { createApp } = __Vue;
+
+        const __tplEl = document.getElementById('appTpl');
+        if (!__tplEl) throw new Error('app template not found');
+        const __tpl = __tplEl.innerHTML;
+
+        __showBootError('Vue createApp()...');
+        const __app = createApp({
+      template: __tpl,
+      data() {
+        return {
+          file: null,
+          localPreviewUrl: null,
+          uploading: false,
+          running: false,
+          jobId: null,
+          status: 'idle',
+          inputUrl: null,
+          outputUrl: null,
+          vizUrl: null,
+          logTail: '',
+          metrics: null,
+          configs: [],
+          recentJobs: [],
+          displayMode: 'full',
+          params: {
+            config: 'config.yaml',
+            perf_mode: 'fast',
+            det_conf: '',
+            det_iou: '',
+            det_imgsz: '',
+            det_bbox_scale: '',
+            freq_window: '',
+            tracker_hungarian: '',
+            use_combined_score: '',
+            use_dynamic_threshold: '',
+          },
+          pollTimer: null,
+          heartbeatTimer: null,
+
+          ui: {
+            mode: 'offline',
+            report_student_id: '',
+            report_student_id_rt: '',
+          },
+
+          rt: {
+            source: '0',
+            sessionId: null,
+            running: false,
+            mjpegUrl: null,
+            statusUrl: null,
+            statusTimer: null,
+            lastStatus: null,
+            max_fps: '10',
+            resize_width: '896',
+            token: '',
+            exp_enabled: '0',
+            expRun: null,
+            record_enabled: '0',
+            record_fps: '10',
+            cameras: [],
+            camSelected: '',
+            latencyProbeTimer: null,
+            latencyProbeCount: 0,
+            latencyLastHeadSeq: -1,
+            latencyLastHeadSeqSample: -1,
+            latencyLastSeq: -1,
+            latencyHeadSamples: [],
+            latencyHeadSamplesDetail: [],
+            latencyHeadStats: null,
+            latencySamples: [],
+            latencySamplesDetail: [],
+            latencyStats: null,
+          },
+        };
+      },
+      computed: {
+        showPanels() {
+          return this.displayMode !== 'viz_only';
+        },
+        topStudents() {
+          const per = this.metrics && Array.isArray(this.metrics.per_student) ? this.metrics.per_student : [];
+          return per
+            .slice()
+            .sort((a, b) => (Number(b.distraction_rate) || 0) - (Number(a.distraction_rate) || 0))
+            .slice(0, 3);
+        },
+        topStudentsAll() {
+          const per = this.metrics && Array.isArray(this.metrics.per_student) ? this.metrics.per_student : [];
+          return per
+            .slice()
+            .sort((a, b) => (Number(b.distraction_rate) || 0) - (Number(a.distraction_rate) || 0))
+            .slice(0, 8);
+        },
+        rtTopStudentsAll() {
+          const m = this.rt && this.rt.lastStatus ? this.rt.lastStatus.metrics : null;
+          const per = m && Array.isArray(m.per_student) ? m.per_student : [];
+          return per
+            .slice()
+            .sort((a, b) => (Number(b.distraction_rate) || 0) - (Number(a.distraction_rate) || 0))
+            .slice(0, 8);
+        },
+        statusTagClass() {
+          if (this.status === 'done') return 'ok';
+          if (this.status === 'error') return 'bad';
+          if (this.status === 'running' || this.status === 'queued') return 'warn';
+          return '';
+        },
+        rtTagClass() {
+          const st = this.rt && this.rt.lastStatus ? this.rt.lastStatus.status : '';
+          if (st === 'running') return 'warn';
+          if (st === 'stopping') return 'warn';
+          if (st === 'stopped') return 'ok';
+          if (st === 'error') return 'bad';
+          return '';
+        }
+      },
+      watch: {
+        'rt.exp_enabled'(v) {
+          try {
+            const on = String(v || '0') === '1';
+            if (!this.rt || !this.rt.running || !this.rt.sessionId) {
+              if (!on) {
+                this._rtResetLatency();
+                this.rt.expRun = null;
+              }
+              return;
+            }
+            if (on) {
+              this._rtStartLatencyProbe();
+            } else {
+              this._rtStopLatencyProbe();
+              this._rtResetLatency();
+              this.rt.expRun = null;
+            }
+          } catch (e) {
+            // ignore
+          }
+        }
+      },
+      methods: {
+        openOfflineOverallReport() {
+          try {
+            if (!this.jobId) return;
+            const url = `/api/jobs/${this.jobId}/report/?lang=zh`;
+            window.open(url, '_blank');
+          } catch (e) {
+            // ignore
+          }
+        },
+        openRealtimeOverallReport() {
+          try {
+            if (!this.rt || !this.rt.sessionId) return;
+            const tok = this.rt && this.rt.token ? String(this.rt.token).trim() : '';
+            const q = tok ? `?token=${encodeURIComponent(tok)}&lang=zh` : `?lang=zh`;
+            const url = `/api/realtime/${this.rt.sessionId}/report/` + q;
+            window.open(url, '_blank');
+          } catch (e) {
+            // ignore
+          }
+        },
+        openOfflineStudentReport(studentId) {
+          try {
+            if (!this.jobId) return;
+            const sid = encodeURIComponent(String(studentId || '').trim());
+            if (!sid) return;
+            const url = `/api/jobs/${this.jobId}/students/${sid}/report/?lang=zh`;
+            window.open(url, '_blank');
+          } catch (e) {
+            // ignore
+          }
+        },
+        openRealtimeStudentReport(studentId) {
+          try {
+            if (!this.rt || !this.rt.sessionId) return;
+            const sid = encodeURIComponent(String(studentId || '').trim());
+            if (!sid) return;
+            const tok = this.rt && this.rt.token ? String(this.rt.token).trim() : '';
+            const q = tok ? `?token=${encodeURIComponent(tok)}&lang=zh` : `?lang=zh`;
+            const url = `/api/realtime/${this.rt.sessionId}/students/${sid}/report/` + q;
+            window.open(url, '_blank');
+          } catch (e) {
+            // ignore
+          }
+        },
+        _rtEnsureExpRun() {
+          if (!this.rt) return;
+          if (!this.rt.expRun) {
+            this.rt.expRun = {
+              started_at_ms: Date.now(),
+              ended_at_ms: null,
+              fps_samples: [],
+            };
+          }
+        },
+        _rtCollectFpsSample() {
+          try {
+            if (!this.rt || String(this.rt.exp_enabled || '0') !== '1') return;
+            if (!this.rt.running || !this.rt.sessionId) return;
+            const fps = this.rt.lastStatus && this.rt.lastStatus.metrics ? Number(this.rt.lastStatus.metrics.session_fps || 0) : 0;
+            if (!Number.isFinite(fps) || fps <= 0) return;
+            this._rtEnsureExpRun();
+            this.rt.expRun.fps_samples.push({ t_ms: Date.now(), fps });
+            if (this.rt.expRun.fps_samples.length > 600) this.rt.expRun.fps_samples.splice(0, this.rt.expRun.fps_samples.length - 600);
+          } catch (e) {
+            // ignore
+          }
+        },
+        _downloadJson(filename, obj) {
+          const s = JSON.stringify(obj, null, 2);
+          const blob = new Blob([s], { type: 'application/json;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => {
+            try { URL.revokeObjectURL(url); } catch (e) {}
+          }, 3000);
+        },
+        rtExportExperiment() {
+          try {
+            if (!this.rt || String(this.rt.exp_enabled || '0') !== '1') return;
+            if (!this.rt.expRun || !this.rt.expRun.started_at_ms) return;
+            const ended = this.rt.expRun.ended_at_ms || Date.now();
+            const payload = {
+              kind: 'realtime_experiment_export',
+              scheme: 'B',
+              probing_hz_nominal: '1-5',
+              probe_interval_ms_default: 900,
+              exported_at_ms: Date.now(),
+              session_id: this.rt.sessionId,
+              source: this.rt.source,
+              params: this.params || {},
+              rt_settings: {
+                max_fps: this.rt.max_fps,
+                resize_width: this.rt.resize_width,
+              },
+              window: {
+                started_at_ms: this.rt.expRun.started_at_ms,
+                ended_at_ms: ended,
+                duration_ms: Math.max(0, ended - this.rt.expRun.started_at_ms),
+              },
+              fps_samples: this.rt.expRun.fps_samples || [],
+              latency: {
+                unit: 'ms',
+                head: {
+                  samples_e2e_ms: this.rt.latencyHeadSamples || [],
+                  samples: this.rt.latencyHeadSamplesDetail || [],
+                  stats: this.rt.latencyHeadStats || null,
+                },
+                render: {
+                  samples_e2e_ms: this.rt.latencySamples || [],
+                  samples: this.rt.latencySamplesDetail || [],
+                  stats: this.rt.latencyStats || null,
+                },
+              },
+            };
+            const ts = new Date().toISOString().replaceAll(':', '-');
+            const name = `rt_experiment_${String(this.rt.sessionId || '').slice(0, 8)}_${ts}.json`;
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => {
+              try { URL.revokeObjectURL(url); } catch (e) {}
+            }, 3000);
+          } catch (e) {
+            // ignore
+          }
+        },
+        _percentile(sorted, p) {
+          if (!sorted || !sorted.length) return 0;
+          const idx = (sorted.length - 1) * p;
+          const lo = Math.floor(idx);
+          const hi = Math.ceil(idx);
+          if (lo === hi) return sorted[lo];
+          const w = idx - lo;
+          return sorted[lo] * (1 - w) + sorted[hi] * w;
+        },
+        _computeLatencyStats(samples) {
+          if (!Array.isArray(samples) || !samples.length) return null;
+          const arr = samples.slice().sort((a, b) => a - b);
+          const n = arr.length;
+          const mean = arr.reduce((s, x) => s + x, 0) / n;
+          const var0 = arr.reduce((s, x) => s + (x - mean) * (x - mean), 0) / Math.max(1, n);
+          const std = Math.sqrt(var0);
+          return {
+            n,
+            mean,
+            std,
+            p50: this._percentile(arr, 0.50),
+            p95: this._percentile(arr, 0.95),
+            p99: this._percentile(arr, 0.99),
+          };
+        },
+        _rtResetLatency() {
+          this.rt.latencyProbeCount = 0;
+          this.rt.latencyLastHeadSeq = -1;
+          this.rt.latencyLastHeadSeqSample = -1;
+          this.rt.latencyHeadStaleCount = 0;
+          this.rt.latencyLastSeq = -1;
+          this.rt.latencyHeadSamples = [];
+          this.rt.latencyHeadSamplesDetail = [];
+          this.rt.latencyHeadStats = null;
+          this.rt.latencySamples = [];
+          this.rt.latencySamplesDetail = [];
+          this.rt.latencyStats = null;
+        },
+        _rtStopLatencyProbe() {
+          if (this.rt.latencyProbeTimer) {
+            clearInterval(this.rt.latencyProbeTimer);
+            this.rt.latencyProbeTimer = null;
+          }
+        },
+        _rtStartLatencyProbe() {
+          this._rtStopLatencyProbe();
+          this._rtResetLatency();
+          if (!this.rt.running || !this.rt.sessionId) return;
+          if (!this.rt || String(this.rt.exp_enabled || '0') !== '1') return;
+          const token = (this.rt && this.rt.token) ? String(this.rt.token).trim() : '';
+          const headers = token ? { 'X-Token': token } : undefined;
+          const baseUrl = `/api/realtime/${this.rt.sessionId}/snapshot.jpg`;
+          this.rt.latencyProbeTimer = setInterval(async () => {
+            if (!this.rt.running || !this.rt.sessionId) return;
+            if (!this.rt || String(this.rt.exp_enabled || '0') !== '1') return;
+            try {
+              const vq = `v=${encodeURIComponent(String(Date.now()))}`;
+              const tq = token ? `&token=${encodeURIComponent(token)}` : '';
+              const urlHead = baseUrl + `?${vq}` + tq;
+              const urlGet = baseUrl + `?probe=1&pw=320&pq=55&${vq}` + tq;
+
+              // Always collect at least one full (GET+render) sample for export.
+              if (!this.rt.latencySamples || this.rt.latencySamples.length === 0) {
+                const res = await fetch(urlGet, { method: 'GET', headers, cache: 'no-store' });
+                if (!res.ok) return;
+
+                const seq = Number(res.headers.get('X-Frame-Seq') || '-1');
+                if (!Number.isFinite(seq) || seq <= 0) return;
+                if (seq === this.rt.latencyLastSeq) return;
+
+                const tCapture = Number(res.headers.get('X-T-Capture-Ms') || '0');
+                const tProcessed = Number(res.headers.get('X-T-Processed-Ms') || '0');
+                const tSent = Number(res.headers.get('X-T-Sent-Ms') || '0');
+                if (!Number.isFinite(tCapture) || tCapture <= 0) return;
+                if (!Number.isFinite(tProcessed) || tProcessed <= 0) return;
+                if (!Number.isFinite(tSent) || tSent <= 0) return;
+                if (tProcessed < tCapture) return;
+                if (tSent < tProcessed) return;
+
+                const blob = await res.blob();
+                const objUrl = URL.createObjectURL(blob);
+                const img = new Image();
+                img.onload = () => {
+                  try {
+                    const tRender = Date.now();
+                    const e2e = tRender - tCapture;
+                    if (Number.isFinite(e2e) && e2e >= 0 && e2e < 60_000) {
+                      this.rt.latencyLastSeq = seq;
+                      this.rt.latencySamples.push(e2e);
+                      if (this.rt.latencySamples.length > 400) this.rt.latencySamples.splice(0, this.rt.latencySamples.length - 400);
+
+                      const s = {
+                        seq,
+                        t_capture_ms: tCapture,
+                        t_processed_ms: tProcessed,
+                        t_sent_ms: tSent,
+                        t_render_ms: tRender,
+                        e2e_ms: e2e,
+                        proc_ms: tProcessed - tCapture,
+                        encode_ms: tSent - tProcessed,
+                        client_ms: tRender - tSent,
+                      };
+                      this.rt.latencySamplesDetail.push(s);
+                      if (this.rt.latencySamplesDetail.length > 400) this.rt.latencySamplesDetail.splice(0, this.rt.latencySamplesDetail.length - 400);
+
+                      this.rt.latencyStats = this._computeLatencyStats(this.rt.latencySamples);
+                    }
+                  } finally {
+                    try { URL.revokeObjectURL(objUrl); } catch (e) {}
+                  }
+                };
+                img.onerror = () => {
+                  try { URL.revokeObjectURL(objUrl); } catch (e) {}
+                };
+                img.src = objUrl;
+                return;
+              }
+
+              // Stage-1: HEAD (cheap) to read seq/timestamps
+              let headSeq = -1;
+              let headSeqValid = false;
+              let headCapture = 0;
+              let headProcessed = 0;
+              let headSent = 0;
+              try {
+                const tHeadRecv = Date.now();
+                const head = await fetch(urlHead, { method: 'HEAD', headers, cache: 'no-store' });
+                if (head && head.ok) {
+                  headSeq = Number(head.headers.get('X-Frame-Seq') || '-1');
+                  headSeqValid = Number.isFinite(headSeq) && headSeq > 0;
+                  headCapture = Number(head.headers.get('X-T-Capture-Ms') || '0');
+                  headProcessed = Number(head.headers.get('X-T-Processed-Ms') || '0');
+                  headSent = Number(head.headers.get('X-T-Sent-Ms') || '0');
+
+                  if (headSeqValid && headSeq !== this.rt.latencyLastHeadSeqSample && Number.isFinite(headCapture) && headCapture > 0) {
+                    const e2eHead = tHeadRecv - headCapture;
+                    if (Number.isFinite(e2eHead) && e2eHead >= 0 && e2eHead < 60_000) {
+                      this.rt.latencyLastHeadSeqSample = headSeq;
+                      this.rt.latencyHeadSamples.push(e2eHead);
+                      if (this.rt.latencyHeadSamples.length > 800) this.rt.latencyHeadSamples.splice(0, this.rt.latencyHeadSamples.length - 800);
+
+                      const sHead = {
+                        seq: headSeq,
+                        t_capture_ms: headCapture,
+                        t_processed_ms: headProcessed,
+                        t_sent_ms: headSent,
+                        t_head_recv_ms: tHeadRecv,
+                        e2e_head_ms: e2eHead,
+                        proc_ms: (Number.isFinite(headProcessed) && headProcessed > 0) ? (headProcessed - headCapture) : null,
+                        encode_ms: (Number.isFinite(headSent) && headSent > 0 && Number.isFinite(headProcessed) && headProcessed > 0) ? (headSent - headProcessed) : null,
+                      };
+                      this.rt.latencyHeadSamplesDetail.push(sHead);
+                      if (this.rt.latencyHeadSamplesDetail.length > 800) this.rt.latencyHeadSamplesDetail.splice(0, this.rt.latencyHeadSamplesDetail.length - 800);
+                      this.rt.latencyHeadStats = this._computeLatencyStats(this.rt.latencyHeadSamples);
+                    }
+                  }
+                } else {
+                  this.rt.latencyHeadStaleCount = (Number(this.rt.latencyHeadStaleCount) || 0) + 1;
+                }
+              } catch (e) {
+                this.rt.latencyHeadStaleCount = (Number(this.rt.latencyHeadStaleCount) || 0) + 1;
+              }
+              if (!headSeqValid) {
+                this.rt.latencyHeadStaleCount = (Number(this.rt.latencyHeadStaleCount) || 0) + 1;
+              } else if (headSeq === this.rt.latencyLastHeadSeq) {
+                this.rt.latencyHeadStaleCount = (Number(this.rt.latencyHeadStaleCount) || 0) + 1;
+              } else {
+                this.rt.latencyHeadStaleCount = 0;
+                this.rt.latencyLastHeadSeq = headSeq;
+              }
+
+              const getEvery = 6;
+              this.rt.latencyProbeCount = (Number(this.rt.latencyProbeCount) || 0) + 1;
+              const stale = (Number(this.rt.latencyHeadStaleCount) || 0);
+              const staleAllow = stale >= 3; // HEAD looks stuck; allow occasional GET to re-sync
+              if (!staleAllow && ((this.rt.latencyProbeCount % getEvery) !== 0)) return;
+
+              // Stage-2: GET only occasionally to measure browser render time
+              const res = await fetch(urlGet, { method: 'GET', headers, cache: 'no-store' });
+              if (!res.ok) return;
+
+              const seq = Number(res.headers.get('X-Frame-Seq') || '-1');
+              if (!Number.isFinite(seq) || seq <= 0) return;
+              if (seq === this.rt.latencyLastSeq) return;
+
+              const tCapture = Number(res.headers.get('X-T-Capture-Ms') || '0');
+              const tProcessed = Number(res.headers.get('X-T-Processed-Ms') || '0');
+              const tSent = Number(res.headers.get('X-T-Sent-Ms') || '0');
+              if (!Number.isFinite(tCapture) || tCapture <= 0) return;
+              if (!Number.isFinite(tProcessed) || tProcessed <= 0) return;
+              if (!Number.isFinite(tSent) || tSent <= 0) return;
+              if (tProcessed < tCapture) return;
+              if (tSent < tProcessed) return;
+
+              const blob = await res.blob();
+              try {
+                if (typeof createImageBitmap === 'function') {
+                  await createImageBitmap(blob);
+                  const tRender = Date.now();
+                  const e2e = tRender - tCapture;
+                  if (Number.isFinite(e2e) && e2e >= 0 && e2e < 60_000) {
+                    this.rt.latencyLastSeq = seq;
+                    this.rt.latencySamples.push(e2e);
+                    if (this.rt.latencySamples.length > 400) this.rt.latencySamples.splice(0, this.rt.latencySamples.length - 400);
+
+                    const s = {
+                      seq,
+                      t_capture_ms: tCapture,
+                      t_processed_ms: tProcessed,
+                      t_sent_ms: tSent,
+                      t_render_ms: tRender,
+                      e2e_ms: e2e,
+                      proc_ms: tProcessed - tCapture,
+                      encode_ms: tSent - tProcessed,
+                      client_ms: tRender - tSent,
+                    };
+                    this.rt.latencySamplesDetail.push(s);
+                    if (this.rt.latencySamplesDetail.length > 400) this.rt.latencySamplesDetail.splice(0, this.rt.latencySamplesDetail.length - 400);
+
+                    this.rt.latencyStats = this._computeLatencyStats(this.rt.latencySamples);
+                  }
+                  return;
+                }
+              } catch (e) {}
+              const objUrl = URL.createObjectURL(blob);
+              const img = new Image();
+              img.onload = () => {
+                try {
+                  const tRender = Date.now();
+                  const e2e = tRender - tCapture;
+                  if (Number.isFinite(e2e) && e2e >= 0 && e2e < 60_000) {
+                    this.rt.latencyLastSeq = seq;
+                    this.rt.latencySamples.push(e2e);
+                    if (this.rt.latencySamples.length > 400) this.rt.latencySamples.splice(0, this.rt.latencySamples.length - 400);
+
+                    const s = {
+                      seq,
+                      t_capture_ms: tCapture,
+                      t_processed_ms: tProcessed,
+                      t_sent_ms: tSent,
+                      t_render_ms: tRender,
+                      e2e_ms: e2e,
+                      proc_ms: tProcessed - tCapture,
+                      encode_ms: tSent - tProcessed,
+                      client_ms: tRender - tSent,
+                    };
+                    this.rt.latencySamplesDetail.push(s);
+                    if (this.rt.latencySamplesDetail.length > 400) this.rt.latencySamplesDetail.splice(0, this.rt.latencySamplesDetail.length - 400);
+
+                    this.rt.latencyStats = this._computeLatencyStats(this.rt.latencySamples);
+                  }
+                } finally {
+                  try { URL.revokeObjectURL(objUrl); } catch (e) {}
+                }
+              };
+              img.onerror = () => {
+                try { URL.revokeObjectURL(objUrl); } catch (e) {}
+              };
+              img.src = objUrl;
+            } catch (e) {
+              // ignore
+            }
+          }, 900);
+        },
+        pickFile() {
+          try {
+            const el = this.$refs && this.$refs.fileInput;
+            if (el && el.click) el.click();
+          } catch (e) {
+            // ignore
+          }
+        },
+        async warmup() {
+          try {
+            const cfg = (this.params && this.params.config) ? this.params.config : 'config.yaml';
+            await fetch(`/api/warmup/?config=${encodeURIComponent(cfg)}`, { method: 'POST' });
+          } catch (e) {
+            // ignore
+          }
+        },
+        async clearHistory() {
+          try {
+            const res = await fetch('/api/jobs/clear-history/', { method: 'POST' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'clear history failed');
+            this.jobId = null;
+            this.status = 'idle';
+            this.inputUrl = null;
+            this.outputUrl = null;
+            this.vizUrl = null;
+            this.logTail = '';
+            this.metrics = null;
+            await this.refreshRecent();
+          } catch (err) {
+            this.status = 'error';
+            this.logTail = String(err);
+          }
+        },
+        startHeartbeat() {
+          if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+          this.heartbeatTimer = setInterval(async () => {
+            if (!this.jobId) return;
+            if (!(this.status === 'starting' || this.status === 'running' || this.status === 'queued')) return;
+            try {
+              await fetch(`/api/jobs/${this.jobId}/heartbeat/`, { method: 'POST' });
+            } catch (e) {
+              // ignore
+            }
+          }, 5000);
+        },
+        stopHeartbeat() {
+          if (this.heartbeatTimer) {
+            clearInterval(this.heartbeatTimer);
+            this.heartbeatTimer = null;
+          }
+        },
+        async stop() {
+          if (!this.jobId) return;
+          try {
+            const res = await fetch(`/api/jobs/${this.jobId}/stop/`, { method: 'POST' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'stop failed');
+            this.status = data.status || this.status;
+            if (this.status !== 'starting' && this.status !== 'running' && this.status !== 'queued') {
+              this.stopHeartbeat();
+            }
+            await this.refresh();
+            await this.refreshRecent();
+          } catch (err) {
+            this.status = 'error';
+            this.logTail = String(err);
+          }
+        },
+        async clearLog() {
+          if (!this.jobId) return;
+          try {
+            const res = await fetch(`/api/jobs/${this.jobId}/clear-log/`, { method: 'POST' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'clear log failed');
+            this.logTail = '';
+            await this.refresh();
+          } catch (err) {
+            this.status = 'error';
+            this.logTail = String(err);
+          }
+        },
+        statusClass(st) {
+          if (st === 'done') return 'ok';
+          if (st === 'error') return 'bad';
+          if (st === 'running' || st === 'queued') return 'warn';
+          return '';
+        },
+        onPick(e) {
+          const f = e.target.files && e.target.files[0];
+          this.file = f || null;
+          this.outputUrl = null;
+          this.logTail = '';
+          this.metrics = null;
+          this.status = 'idle';
+          this.jobId = null;
+          if (this.localPreviewUrl) {
+            URL.revokeObjectURL(this.localPreviewUrl);
+          }
+          this.localPreviewUrl = this.file ? URL.createObjectURL(this.file) : null;
+        },
+        async upload() {
+          if (!this.file) return;
+          this.uploading = true;
+          try {
+            const fd = new FormData();
+            fd.append('file', this.file);
+            const res = await fetch('/api/jobs/', { method: 'POST', body: fd });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'upload failed');
+            this.jobId = data.job_id;
+            this.inputUrl = data.input_url;
+            this.status = 'uploaded';
+            await this.refresh();
+            await this.refreshRecent();
+          } catch (err) {
+            this.status = 'error';
+            this.logTail = String(err);
+          } finally {
+            this.uploading = false;
+          }
+        },
+        async run() {
+          if (!this.jobId) return;
+          this.running = true;
+          try {
+            const res = await fetch(`/api/jobs/${this.jobId}/run/`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ params: this.params, display_mode: this.displayMode })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'run failed');
+            this.status = data.status || 'running';
+            this.startHeartbeat();
+            this.startPoll();
+            await this.refreshRecent();
+          } catch (err) {
+            this.status = 'error';
+            this.logTail = String(err);
+          } finally {
+            this.running = false;
+          }
+        },
+        startPoll() {
+          if (this.pollTimer) clearInterval(this.pollTimer);
+          this.pollTimer = setInterval(async () => {
+            await this.refresh();
+            if (this.status === 'done' || this.status === 'error') {
+              clearInterval(this.pollTimer);
+              this.pollTimer = null;
+              this.stopHeartbeat();
+            }
+          }, 1000);
+        },
+        async refresh() {
+          if (!this.jobId) return;
+          const res = await fetch(`/api/jobs/${this.jobId}/`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'status failed');
+          this.status = data.status || 'unknown';
+          if (data.output_url) {
+            const v = (data.detail && data.detail.updated_at) ? String(data.detail.updated_at) : String(Date.now());
+            this.outputUrl = data.output_url + (data.output_url.includes('?') ? '&' : '?') + 'v=' + encodeURIComponent(v);
+          } else {
+            this.outputUrl = null;
+          }
+          this.vizUrl = data.viz_url || null;
+          this.logTail = data.log_tail || '';
+          this.metrics = data.metrics || null;
+        }
+        ,
+        async loadConfigs() {
+          const res = await fetch('/api/configs/');
+          const data = await res.json();
+          if (res.ok) {
+            this.configs = data.configs || [];
+            if (data.default && !this.params.config) this.params.config = data.default;
+            if (this.configs.length && !this.params.config) this.params.config = this.configs[0];
+            if (this.configs.length && !this.configs.includes(this.params.config)) this.params.config = data.default || this.configs[0];
+          }
+        },
+        async refreshRecent() {
+          const res = await fetch('/api/jobs/recent/?limit=20');
+          const data = await res.json();
+          if (res.ok) {
+            this.recentJobs = data.jobs || [];
+          }
+        },
+        async selectJob(jobId) {
+          this.jobId = jobId;
+          await this.refresh();
+          if (this.status === 'starting' || this.status === 'running' || this.status === 'queued') {
+            this.startHeartbeat();
+          } else {
+            this.stopHeartbeat();
+          }
+        }
+        ,
+        async rtStart() {
+          try {
+            try {
+              const cfg = (this.params && this.params.config) ? this.params.config : 'config.yaml';
+              await fetch(`/api/warmup/?config=${encodeURIComponent(cfg)}`, { method: 'POST' });
+            } catch (e) {
+              // ignore
+            }
+
+            if (this.rt && this.rt.camSelected) {
+              this.rt.source = String(this.rt.camSelected);
+            }
+
+            const payload = {
+              source: this.rt.source,
+              params: this.params,
+              max_fps: this.rt.max_fps,
+              resize_width: this.rt.resize_width,
+              record_enabled: String(this.rt.record_enabled || '0') === '1',
+              record_fps: this.rt.record_fps,
+            };
+
+            const token = (this.rt && this.rt.token) ? String(this.rt.token).trim() : '';
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['X-Token'] = token;
+
+            const res = await fetch('/api/realtime/start/', {
+              method: 'POST',
+              headers,
+              body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'realtime start failed');
+            this.rt.sessionId = data.session_id;
+
+            const baseV = 'v=' + encodeURIComponent(String(Date.now()));
+            const qp = token ? ('token=' + encodeURIComponent(token) + '&' + baseV) : baseV;
+
+            this.rt.mjpegUrl = data.mjpeg_url + (data.mjpeg_url.includes('?') ? '&' : '?') + qp;
+            this.rt.statusUrl = data.status_url + (data.status_url.includes('?') ? '&' : '?') + (token ? ('token=' + encodeURIComponent(token)) : '');
+            this.rt.running = true;
+            this.rt.lastStatus = null;
+
+            if (String(this.rt.exp_enabled || '0') === '1') {
+              this.rt.expRun = { started_at_ms: Date.now(), ended_at_ms: null, fps_samples: [] };
+              this._rtStartLatencyProbe();
+            }
+
+            if (this.rt.statusTimer) clearInterval(this.rt.statusTimer);
+            this.rt.statusTimer = setInterval(async () => {
+              if (!this.rt.running || !this.rt.sessionId) return;
+              try {
+                const r = await fetch(this.rt.statusUrl, token ? { headers: { 'X-Token': token } } : undefined);
+                const st = await r.json();
+                if (r.ok) {
+                  this.rt.lastStatus = st;
+                  this._rtCollectFpsSample();
+                  if (st.status && (st.status === 'stopped' || st.status === 'error')) {
+                    this.rt.running = false;
+                    if (this.rt.statusTimer) {
+                      clearInterval(this.rt.statusTimer);
+                      this.rt.statusTimer = null;
+                    }
+                  }
+                }
+              } catch (e) {
+                // ignore
+              }
+            }, 800);
+          } catch (err) {
+            this.status = 'error';
+            this.logTail = String(err);
+          }
+        },
+        async rtStop() {
+          if (!this.rt.sessionId) return;
+          try {
+            const token = (this.rt && this.rt.token) ? String(this.rt.token).trim() : '';
+            const headers = token ? { 'X-Token': token } : undefined;
+            const res = await fetch(`/api/realtime/${this.rt.sessionId}/stop/`, { method: 'POST', headers });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'realtime stop failed');
+            this.rt.running = false;
+            this._rtStopLatencyProbe();
+            if (this.rt && this.rt.expRun && !this.rt.expRun.ended_at_ms) this.rt.expRun.ended_at_ms = Date.now();
+            if (this.rt.statusTimer) {
+              clearInterval(this.rt.statusTimer);
+              this.rt.statusTimer = null;
+            }
+          } catch (err) {
+            this.status = 'error';
+            this.logTail = String(err);
+          }
+        }
+
+        ,
+        async rtProbeCameras() {
+          try {
+            const token = (this.rt && this.rt.token) ? String(this.rt.token).trim() : '';
+            const url = '/api/realtime/cameras/' + (token ? ('?token=' + encodeURIComponent(token)) : '');
+            const res = await fetch(url, token ? { headers: { 'X-Token': token } } : undefined);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'probe cameras failed');
+            this.rt.cameras = Array.isArray(data.cameras) ? data.cameras : [];
+            if (this.rt.cameras.length && !this.rt.camSelected) {
+              this.rt.camSelected = String(this.rt.cameras[0]);
+            }
+          } catch (err) {
+            this.status = 'error';
+            this.logTail = String(err);
+          }
+        },
+        async rtSnapshot() {
+          if (!this.rt.sessionId) return;
+          try {
+            const token = (this.rt && this.rt.token) ? String(this.rt.token).trim() : '';
+            const url = `/api/realtime/${this.rt.sessionId}/snapshot.jpg` + (token ? ('?token=' + encodeURIComponent(token)) : '');
+            window.open(url, '_blank');
+          } catch (err) {
+            this.status = 'error';
+            this.logTail = String(err);
+          }
+        }
+      },
+      async mounted() {
+        await this.loadConfigs();
+        await this.refreshRecent();
+        await this.warmup();
+
+        try {
+          await this.rtProbeCameras();
+        } catch (e) {
+          // ignore
+        }
+
+        window.addEventListener('beforeunload', () => {
+          try {
+            if (this.jobId && (this.status === 'starting' || this.status === 'running' || this.status === 'queued')) {
+              fetch(`/api/jobs/${this.jobId}/stop/`, { method: 'POST', keepalive: true });
+            }
+            if (this.rt && this.rt.sessionId && this.rt.running) {
+              const token = (this.rt && this.rt.token) ? String(this.rt.token).trim() : '';
+              const headers = token ? { 'X-Token': token } : undefined;
+              fetch(`/api/realtime/${this.rt.sessionId}/stop/`, { method: 'POST', headers, keepalive: true });
+            }
+          } catch (e) {
+            // ignore
+          }
+        });
+      },
+      beforeUnmount() {
+        if (this.pollTimer) clearInterval(this.pollTimer);
+        if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
+        if (this.rt && this.rt.statusTimer) clearInterval(this.rt.statusTimer);
+        if (this.localPreviewUrl) URL.revokeObjectURL(this.localPreviewUrl);
+      }
+        });
+
+        window.__vue_app__ = __app;
+
+        __showBootError('Vue mount()...');
+        const __vm = __app.mount('#app');
+        window.__vue_vm__ = __vm;
+
+        __showBootError('Vue mounted.');
+
+        try {
+          const el = __getBootEl();
+          if (el) el.style.display = 'none';
+        } catch (e) {
+          // ignore
+        }
+      } catch (e) {
+        const m = e && (e.stack || e.message) ? (e.stack || e.message) : e;
+        __showBootError('前端初始化失败：\n' + String(m));
+      }
+    })();
+  </script>
+</body>
+</html>
