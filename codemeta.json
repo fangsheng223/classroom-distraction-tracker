@@ -1,0 +1,98 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "identifier": "https://github.com/fangsheng223/classroom-distraction-tracker",
+  "name": "Classroom Distraction Estimation via Tracking-to-Analysis Continuity",
+  "version": "1.1.0-dataset",
+  "dateCreated": "2026-06-17",
+  "dateModified": "2026-07-06",
+  "datePublished": "2026-07-06",
+  "description": "Dual-mode (real-time streaming and offline batch), edge-optimized computer vision framework for interpretable classroom distraction estimation based on tracking-to-analysis continuity. Includes a YOLOv8 person detector, motion-adaptive dynamic-IoU multi-person tracker, a 21,475-parameter lightweight CNN status classifier, temporal context correction, and a Django-based web demo. Designed for educational researchers and smart-classroom practitioners.",
+  "keywords": [
+    "classroom analytics",
+    "multi-person tracking",
+    "student engagement",
+    "distraction estimation",
+    "lightweight CNN",
+    "temporal context correction",
+    "computer vision",
+    "education technology",
+    "smart classroom"
+  ],
+  "license": "https://opensource.org/licenses/MIT",
+  "codeRepository": "https://github.com/fangsheng223/classroom-distraction-tracker",
+  "releaseNotes": "https://github.com/fangsheng223/classroom-distraction-tracker/releases/tag/v1.1.0-dataset",
+  "issueTracker": "https://github.com/fangsheng223/classroom-distraction-tracker/issues",
+  "programmingLanguage": [
+    {
+      "name": "Python",
+      "version": ">=3.10",
+      "url": "https://www.python.org/"
+    }
+  ],
+  "runtimePlatform": [
+    "Windows",
+    "Linux"
+  ],
+  "targetProduct": {
+    "@type": "SoftwareApplication",
+    "name": "Classroom Distraction Tracker",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": ["Windows", "Linux"]
+  },
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Junqi",
+      "familyName": "Jia",
+      "email": "jiajunqi@lynu.edu.cn",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "School of Artificial Intelligence, Luoyang Normal University",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Luoyang",
+          "postalCode": "471934",
+          "addressCountry": "China"
+        }
+      }
+    },
+    {
+      "@type": "Person",
+      "givenName": "Haolin",
+      "familyName": "Fang",
+      "email": "2698880542@qq.com",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "School of Artificial Intelligence, Luoyang Normal University",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Luoyang",
+          "postalCode": "471934",
+          "addressCountry": "China"
+        }
+      }
+    }
+  ],
+  "citation": [
+    {
+      "@type": "Dataset",
+      "name": "Classroom Distraction Evaluation Dataset (CDED-7) - v1.1.0-dataset",
+      "identifier": "https://doi.org/10.5281/zenodo.21207208",
+      "url": "https://zenodo.org/records/21207208"
+    },
+    {
+      "@type": "Dataset",
+      "name": "Classroom Distraction Evaluation Dataset (CDED-7) - Concept DOI (always latest version)",
+      "identifier": "https://doi.org/10.5281/zenodo.21206958",
+      "url": "https://zenodo.org/records/21206958"
+    }
+  ],
+  "relatedLink": [
+    "https://github.com/fangsheng223/classroom-distraction-tracker/blob/main/README.md",
+    "https://github.com/fangsheng223/classroom-distraction-tracker/blob/main/DATA_AVAILABILITY.md",
+    "https://github.com/fangsheng223/classroom-distraction-tracker/blob/main/DATASET_LICENSE.md",
+    "https://github.com/fangsheng223/classroom-distraction-tracker/blob/main/DATACARD.md",
+    "https://github.com/fangsheng223/classroom-distraction-tracker/blob/main/CITATION.cff"
+  ]
+}

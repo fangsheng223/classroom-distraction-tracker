@@ -14,8 +14,12 @@ type: software
 authors:
   - family-names: Jia
     given-names: Junqi
-    affiliation: "School of Artificial Intelligence, Luoyang Normal University"
+    affiliation: "School of Artificial Intelligence, Luoyang Normal University, Luoyang 471934, China"
     email: jiajunqi@lynu.edu.cn
+  - family-names: Fang
+    given-names: Haolin
+    affiliation: "School of Artificial Intelligence, Luoyang Normal University, Luoyang 471934, China"
+    email: 2698880542@qq.com
 identifiers:
   - type: url
     value: "https://github.com/fangsheng223/classroom-distraction-tracker"
@@ -23,6 +27,12 @@ identifiers:
   - type: url
     value: "https://github.com/fangsheng223/classroom-distraction-tracker/releases/tag/v1.1.0-dataset"
     description: "Tagged Release v1.1.0-dataset (code + annotations + derived package)"
+  - type: doi
+    value: "10.5281/zenodo.21206958"
+    description: "Zenodo Concept DOI for the self-curated Classroom Distraction Evaluation Dataset (CDED-7); always resolves to the latest version"
+  - type: doi
+    value: "10.5281/zenodo.21207208"
+    description: "Zenodo DOI for the current latest version (v1.1.0-dataset); archives the seven raw evaluation videos plus derived_release and submission_assets"
 keywords:
   - classroom analytics
   - multi-person tracking
@@ -35,5 +45,5 @@ keywords:
   - smart classroom
 license: MIT
 version: "1.1.0-dataset"
-date-released: "2026-06-17"
+date-released: "2026-07-06"
 repository-code: "https://github.com/fangsheng223/classroom-distraction-tracker"

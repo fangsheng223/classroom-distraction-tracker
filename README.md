@@ -21,6 +21,30 @@ A dual-mode (real-time streaming / offline batch), edge-optimized computer visio
 
 ---
 
+## Contents
+
+This README satisfies the PeerJ Computer Science data-availability and code-availability checklists. Each row below maps the editor's required element to the corresponding section so editors and reviewers can locate it in one click.
+
+| # | Section | Editor-required element |
+|---|---------|-------------------------|
+| 1 | [Self-Curated Dataset at a Glance](#1-self-curated-dataset-at-a-glance) | Title; Dataset Information; Self-Curated Dataset (DOI/URL + assembly details) |
+| 2 | [Description](#2-description) | Description — overview of the code/dataset |
+| 3 | [Dataset Information](#3-dataset-information) | Dataset Information |
+| 4 | [Code Information](#4-code-information) | Code Information — repository structure and key modules |
+| 5 | [Usage Instructions](#5-usage-instructions) | Usage Instructions — installation, web demo, Python API, reproduction |
+| 6 | [Methodology](#6-methodology) | Methodology — five-stage pipeline and **6.5 Dataset Construction Protocol** |
+| 7 | [Performance](#7-performance) | Key reported metrics |
+| 8 | [Citations](#8-citations) | Citations — manuscript + Zenodo + Roboflow sources |
+| 9 | [License & Contribution Guidelines](#9-license--contribution-guidelines) | License & Contribution Guidelines |
+| 10 | [Additional Documentation](#10-additional-documentation) | Cross-references to `DATA_AVAILABILITY.md`, `DATASET_LICENSE.md`, `DATACARD.md`, `MODEL_ACCESS.md`, `RELEASES.md` |
+| 11 | [Contact](#11-contact) | Corresponding author contact |
+
+Requirements (Python dependencies) are listed inline in [§5.1 Installation](#51-installation).
+
+---
+
+---
+
 ## 1. Self-Curated Dataset at a Glance
 
 The evaluation dataset used in this study is a **self-curated dataset** of seven authentic classroom videos (`class_1.mp4` … `class_7.mp4`), assembled and annotated by the authors of the manuscript. The full release channel, license, and access terms are summarised below so that editors, reviewers, and readers can immediately locate the dataset, the per-video annotations, and the privacy-aware derived package.
