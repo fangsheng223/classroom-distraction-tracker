@@ -1,0 +1,35 @@
+# Normalize all text files to LF line endings, regardless of OS.
+# This avoids the "phantom CRLF" diff noise on Windows checkouts
+# (core.autocrlf=true) and keeps diffs focused on actual content changes.
+
+*               text=auto eol=lf
+
+# Force binary files (videos, archives, figures) to be checked in as-is.
+*.mp4           binary
+*.zip           binary
+*.pdf           binary
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
+*.webp          binary
+*.svg           binary
+*.ttf           binary
+*.otf           binary
+*.woff          binary
+*.woff2         binary
+*.ico           binary
+*.pkl           binary
+*.pt            binary
+*.pth           binary
+*.onnx          binary
+*.npz           binary
+*.npy           binary
+*.h5            binary
+*.hdf5          binary
+*.tar           binary
+*.tar.gz        binary
+*.gz            binary
+*.tgz           binary
+*.7z            binary
+*.rar           binary
